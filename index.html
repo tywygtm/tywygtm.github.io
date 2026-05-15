@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>鑫光大瑁恩瑁爱店优惠券</title>
+    <title>鑫光大瑁恩瑁爱店</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;font-family:"微软雅黑",sans-serif}
         body{background:#f4f4f4;padding:20px}
@@ -21,73 +21,79 @@
     </style>
 </head>
 <body>
+
 <div class="box">
     <div class="top">
         <div class="shop" id="shopName">鑫光大瑁恩瑁爱店</div>
         <div class="money">满100减15</div>
     </div>
+
     <div class="body">
         <div class="tip">线下门店专用 · 仅限使用一次</div>
         <div class="code" id="userCode">加载中...</div>
         <div class="tip">请截图保存<br>到店出示核销码使用</div>
+
         <div class="admin" id="adminPanel">
-            <h3 style="text-align:center;margin-bottom:10px">商家核销后台</h3>
-            <input id="checkCode" placeholder="输入8位数字核销码">
-            <button onclick="verifyCoupon()">确认核销</button>
-            <div class="msg" id="msgBox"></div>
+            <h3 style="text-align:center;margin-bottom:10px">商家核销</h3>
+            <input id="checkCode" placeholder="输入核销码（如：20260001）">
+            <button onclick="verify()">确认核销</button>
+            <div class="msg" id="msg"></div>
         </div>
     </div>
 </div>
 
 <script>
-// 1. 用户端：生成固定8位核销码，刷新/重进永远不变
-(function initUserCoupon() {
-    let storedCode = localStorage.getItem("couponCode");
-    if (!storedCode) {
-        // 生成8位不重复数字券
-        storedCode = String(Math.floor(10000000 + Math.random() * 90000000));
-        localStorage.setItem("couponCode", storedCode);
-    }
-    document.getElementById("userCode").innerText = storedCode;
-})();
+// ==============================================
+// 规则：
+// 1. 码从 20260001 开始递增
+// 2. 一人一码，永久不变
+// 3. 核销后不能再用
+// ==============================================
 
-// 2. 隐藏核销入口：点击店铺名称5次弹出
+// 1. 用户领取固定递增码（永久不变）
+let userCode = localStorage.getItem("userCode");
+if (!userCode) {
+    // 从全局取当前最大号码
+    let currentNum = parseInt(localStorage.getItem("globalNum") || "20260000");
+    currentNum++;
+    userCode = currentNum.toString();
+    localStorage.setItem("globalNum", currentNum);
+    localStorage.setItem("userCode", userCode);
+}
+document.getElementById("userCode").innerText = userCode;
+
+// 2. 商家入口（点店铺名5次）
 let clickCount = 0;
-document.getElementById("shopName").addEventListener("click", () => {
+document.getElementById("shopName").onclick = function(){
     clickCount++;
-    if (clickCount >= 5) {
+    if(clickCount >=5){
         document.getElementById("adminPanel").style.display = "block";
         clickCount = 0;
     }
-});
+}
 
-// 3. 核销逻辑（纯本地，无网络请求，零报错）
-function verifyCoupon() {
-    let inputCode = document.getElementById("checkCode").value.trim();
-    let msgDom = document.getElementById("msgBox");
+// 3. 核销（本地真实记录，无网络错误）
+function verify() {
+    let input = document.getElementById("checkCode").value.trim();
+    let msg = document.getElementById("msg");
 
-    // 校验格式
-    if (!/^\d{8}$/.test(inputCode)) {
-        msgDom.innerText = "请输入正确的8位数字核销码";
-        msgDom.style.color = "red";
+    if (!input || input.length !== 8) {
+        msg.innerText = "请输入8位核销码";
+        msg.style.color = "red";
         return;
     }
 
-    // 获取已核销列表
-    let usedCoupons = JSON.parse(localStorage.getItem("usedCoupons") || "[]");
+    let used = JSON.parse(localStorage.getItem("used") || "[]");
 
-    // 判断是否已核销
-    if (usedCoupons.includes(inputCode)) {
-        msgDom.innerText = "❌ 该优惠券已核销，禁止重复使用";
-        msgDom.style.color = "red";
-        return;
+    if (used.includes(input)) {
+        msg.innerText = "❌ 已核销，不可重复使用";
+        msg.style.color = "red";
+    } else {
+        used.push(input);
+        localStorage.setItem("used", JSON.stringify(used));
+        msg.innerText = "✅ 核销成功";
+        msg.style.color = "green";
     }
-
-    // 核销成功，记录到本地
-    usedCoupons.push(inputCode);
-    localStorage.setItem("usedCoupons", JSON.stringify(usedCoupons));
-    msgDom.innerText = "✅ 核销成功！";
-    msgDom.style.color = "green";
 }
 </script>
 </body>
