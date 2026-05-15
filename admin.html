@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商家优惠券核销系统</title>
+    <style>
+        body {
+            padding: 30px 20px;
+            max-width: 450px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+        h2 {
+            text-align: center;
+            color: #d62828;
+            margin-bottom: 25px;
+        }
+        .input-box {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .btn-check {
+            width: 100%;
+            padding: 14px;
+            background: #e63946;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .result-box {
+            margin-top: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .success {
+            color: #2ecc71;
+        }
+        .error {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <h2>鑫光大瑁恩瑁爱店 核销后台</h2>
+    <input class="input-box" id="couponInput" placeholder="输入用户优惠券编号">
+    <button class="btn-check" onclick="verifyCoupon()">立即核销</button>
+    <div class="result-box" id="resultText"></div>
+
+    <script>
+        // 核销校验逻辑
+        function verifyCoupon() {
+            let code = document.getElementById("couponInput").value.trim();
+            let resultDom = document.getElementById("resultText");
+            if (!code) {
+                resultDom.innerText = "请填写优惠券编号";
+                resultDom.className = "result-box error";
+                return;
+            }
+            // 获取已核销券列表
+            let usedList = JSON.parse(localStorage.getItem("usedCouponList") || "[]");
+            if (usedList.includes(code)) {
+                resultDom.innerText = "❌ 该优惠券已核销，禁止重复使用";
+                resultDom.className = "result-box error";
+            } else {
+                usedList.push(code);
+                localStorage.setItem("usedCouponList", JSON.stringify(usedList));
+                resultDom.innerText = "✅ 核销成功，本次优惠生效";
+                resultDom.className = "result-box success";
+            }
+        }
+    </script>
+</body>
+</html>
