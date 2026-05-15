@@ -1,36 +1,103 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>专属优惠券</title>
-<style>
-body{font-family:"Microsoft YaHei",sans-serif;background:#f5f7fa;margin:0;padding:20px;}
-.coupon{background:linear-gradient(135deg,#ff6b6b,#ff8e53);color:#fff;border-radius:20px;padding:30px 20px;text-align:center;max-width:400px;margin:0 auto;box-shadow:0 8px 20px rgba(0,0,0,0.15);}
-.title{font-size:22px;font-weight:bold;margin-bottom:15px;}
-.discount{font-size:48px;font-weight:bold;margin:10px 0;}
-.info{font-size:16px;margin:8px 0;opacity:0.95;}
-.code{background:rgba(255,255,255,0.2);padding:10px;border-radius:10px;font-weight:bold;letter-spacing:1px;margin:15px 0;}
-.btn{background:#fff;color:#ff6b6b;border:none;padding:12px 25px;border-radius:30px;font-weight:bold;margin-top:15px;cursor:pointer;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鑫光大瑁恩瑁爱店优惠券</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "微软雅黑", sans-serif;
+        }
+        body {
+            background: #f8f8f8;
+            padding: 20px;
+        }
+        .coupon-box {
+            background: #fff;
+            max-width: 420px;
+            margin: 30px auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .coupon-top {
+            background: #e63946;
+            color: #fff;
+            text-align: center;
+            padding: 20px 15px;
+        }
+        .shop-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .discount-text {
+            font-size: 42px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .coupon-body {
+            padding: 25px 20px;
+            text-align: center;
+        }
+        .valid-time {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .coupon-code {
+            background: #fef2f3;
+            color: #d62828;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 14px 10px;
+            border-radius: 10px;
+            letter-spacing: 1px;
+            margin: 15px 0;
+        }
+        .desc-tip {
+            font-size: 13px;
+            color: #888;
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body>
-<div class="coupon">
-<div class="title">🎁 专属福利优惠券</div>
-<div class="discount">满100减30</div>
-<div class="info">有效期：2026.05.15 - 2026.06.15</div>
-<div class="code" id="couponCode">YQ20260515000000</div>
-<div class="info">⚠️ 每券唯一，转发无效</div>
-<button class="btn" onclick="location.reload()">刷新新券</button>
-</div>
-<script>
-function genCode(){
-    let d=new Date();
-    let dateStr=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
-    let random=Math.floor(100000+Math.random()*900000);
-    return "YQ"+dateStr+random;
-}
-document.getElementById("couponCode").innerText=genCode();
-</script>
+    <div class="coupon-box">
+        <div class="coupon-top">
+            <div class="shop-name">鑫光大瑁恩瑁爱店</div>
+            <div class="discount-text">满100减15</div>
+            <div style="font-size:14px;">线下门店通用券</div>
+        </div>
+        <div class="coupon-body">
+            <div class="valid-time">长期有效 · 到店直接使用</div>
+            <div class="coupon-code" id="couponCode">加载优惠券编号...</div>
+            <div class="desc-tip">
+                请截图保存本券<br>
+                到店出示优惠券编号即可核销<br>
+                每张优惠券仅限使用一次
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 生成唯一优惠券编号：店铺前缀+时间戳+随机数 永不重复
+        function getUniqueCouponCode() {
+            const timestamp = new Date().getTime();
+            const randomNum = Math.floor(100000 + Math.random() * 900000);
+            return "XGDMA-" + timestamp + "-" + randomNum;
+        }
+
+        // 本地存储：用户同一手机只生成一张券，不会重复领券
+        let userCoupon = localStorage.getItem("shopCouponCode");
+        if (!userCoupon) {
+            userCoupon = getUniqueCouponCode();
+            localStorage.setItem("shopCouponCode", userCoupon);
+        }
+        document.getElementById("couponCode").innerText = userCoupon;
+    </script>
 </body>
 </html>
