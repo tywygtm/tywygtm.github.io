@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>专属优惠券</title>
+<style>
+body{font-family:"Microsoft YaHei",sans-serif;background:#f5f7fa;margin:0;padding:20px;}
+.coupon{background:linear-gradient(135deg,#ff6b6b,#ff8e53);color:#fff;border-radius:20px;padding:30px 20px;text-align:center;max-width:400px;margin:0 auto;box-shadow:0 8px 20px rgba(0,0,0,0.15);}
+.title{font-size:22px;font-weight:bold;margin-bottom:15px;}
+.discount{font-size:48px;font-weight:bold;margin:10px 0;}
+.info{font-size:16px;margin:8px 0;opacity:0.95;}
+.code{background:rgba(255,255,255,0.2);padding:10px;border-radius:10px;font-weight:bold;letter-spacing:1px;margin:15px 0;}
+.btn{background:#fff;color:#ff6b6b;border:none;padding:12px 25px;border-radius:30px;font-weight:bold;margin-top:15px;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="coupon">
+<div class="title">🎁 专属福利优惠券</div>
+<div class="discount">满100减30</div>
+<div class="info">有效期：2026.05.15 - 2026.06.15</div>
+<div class="code" id="couponCode">YQ20260515000000</div>
+<div class="info">⚠️ 每券唯一，转发无效</div>
+<button class="btn" onclick="location.reload()">刷新新券</button>
+</div>
+<script>
+function genCode(){
+    let d=new Date();
+    let dateStr=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+    let random=Math.floor(100000+Math.random()*900000);
+    return "YQ"+dateStr+random;
+}
+document.getElementById("couponCode").innerText=genCode();
+</script>
+</body>
+</html>
