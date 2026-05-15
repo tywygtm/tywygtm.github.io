@@ -3,101 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>鑫光大瑁恩瑁爱店优惠券</title>
+    <title>鑫光大瑁恩瑁爱店</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: "微软雅黑", sans-serif;
-        }
-        body {
-            background: #f8f8f8;
-            padding: 20px;
-        }
-        .coupon-box {
-            background: #fff;
-            max-width: 420px;
-            margin: 30px auto;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .coupon-top {
-            background: #e63946;
-            color: #fff;
-            text-align: center;
-            padding: 20px 15px;
-        }
-        .shop-name {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-        .discount-text {
-            font-size: 42px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .coupon-body {
-            padding: 25px 20px;
-            text-align: center;
-        }
-        .valid-time {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
-        .coupon-code {
-            background: #fef2f3;
-            color: #d62828;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 14px 10px;
-            border-radius: 10px;
-            letter-spacing: 1px;
-            margin: 15px 0;
-        }
-        .desc-tip {
-            font-size: 13px;
-            color: #888;
-            line-height: 1.6;
-        }
+        *{margin:0;padding:0;box-sizing:border-box;font-family:微软雅黑,sans-serif}
+        body{background:#f4f4f4;padding:20px}
+        .box{max-width:400px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,0.1)}
+        .top{background:#e63946;color:#fff;text-align:center;padding:25px 15px}
+        .shop{font-size:20px;font-weight:bold}
+        .money{font-size:42px;font-weight:bold;margin:8px 0}
+        .body{padding:25px 20px;text-align:center}
+        .code{background:#fef2f2;color:#d62828;padding:14px;border-radius:10px;font-size:18px;letter-spacing:2px;font-weight:bold;margin:16px 0}
+        .tip{color:#666;font-size:14px;line-height:1.6}
+        .admin{display:none;margin-top:25px;padding-top:20px;border-top:1px solid #eee}
+        input{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;margin-bottom:10px}
+        button{width:100%;padding:12px;background:#e63946;color:#fff;border:none;border-radius:8px;font-weight:bold}
+        .msg{margin-top:15px;font-weight:bold;text-align:center}
     </style>
 </head>
 <body>
-    <div class="coupon-box">
-        <div class="coupon-top">
-            <div class="shop-name">鑫光大瑁恩瑁爱店</div>
-            <div class="discount-text">满100减15</div>
-            <div style="font-size:14px;">线下门店通用券</div>
-        </div>
-        <div class="coupon-body">
-            <div class="valid-time">长期有效 · 到店直接使用</div>
-            <div class="coupon-code" id="couponCode">加载优惠券编号...</div>
-            <div class="desc-tip">
-                请截图保存本券<br>
-                到店出示优惠券编号即可核销<br>
-                每张优惠券仅限使用一次
-            </div>
-        </div>
+
+<div class="box">
+    <div class="top">
+        <div class="shop" id="shopName">鑫光大瑁恩瑁爱店</div>
+        <div class="money">满100减15</div>
     </div>
 
-    <script>
-        // 生成唯一优惠券编号：店铺前缀+时间戳+随机数 永不重复
-        function getUniqueCouponCode() {
-            const timestamp = new Date().getTime();
-            const randomNum = Math.floor(100000 + Math.random() * 900000);
-            return "XGDMA-" + timestamp + "-" + randomNum;
+    <div class="body">
+        <div class="tip">线下门店专用 · 仅限使用一次</div>
+        <div class="code" id="userCode">加载中...</div>
+        <div class="tip">请截图保存<br>到店出示核销码使用</div>
+
+        <div class="admin" id="adminPanel">
+            <h3 style="text-align:center;margin-bottom:10px">商家核销</h3>
+            <input id="checkCode" placeholder="输入8位核销码">
+            <button onclick="verify()">确认核销</button>
+            <div class="msg" id="msg"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================== 配置 ====================
+const CLOUD_URL = "https://api.jsonbin.io/v3/b/665a1f3cad19bd642bf4a111";
+const HEADERS = { "X-Master-Key": "$2a$10$uXQexgPuZwv1KQ8oG5OVHuQpK7o/kXJQoCH5uajzH4Ffa61S15wOu" };
+
+// ==================== 用户领券（扫一次固定） ====================
+let code = localStorage.getItem("userCode");
+if (!code) {
+    code = String(Math.floor(10000000 + Math.random() * 90000000));
+    localStorage.setItem("userCode", code);
+}
+document.getElementById("userCode").innerText = code;
+
+// ==================== 商家隐藏入口（点店铺名5次） ====================
+let clickCount = 0;
+document.getElementById("shopName").onclick = () => {
+    clickCount++;
+    if (clickCount >= 5) {
+        document.getElementById("adminPanel").style.display = "block";
+        clickCount = 0;
+    }
+};
+
+// ==================== 云端核销（真正统一记录） ====================
+async function verify() {
+    const input = document.getElementById("checkCode").value.trim();
+    const msg = document.getElementById("msg");
+
+    if (!input || input.length !== 8) {
+        msg.innerText = "请输入8位核销码";
+        msg.style.color = "red";
+        return;
+    }
+
+    try {
+        // 1. 从云端读取已核销列表
+        let res = await fetch(CLOUD_URL);
+        let data = await res.json();
+        let used = data.record.used || [];
+
+        // 2. 判断是否已使用
+        if (used.includes(input)) {
+            msg.innerText = "❌ 已核销，不可重复使用";
+            msg.style.color = "red";
+            return;
         }
 
-        // 本地存储：用户同一手机只生成一张券，不会重复领券
-        let userCoupon = localStorage.getItem("shopCouponCode");
-        if (!userCoupon) {
-            userCoupon = getUniqueCouponCode();
-            localStorage.setItem("shopCouponCode", userCoupon);
-        }
-        document.getElementById("couponCode").innerText = userCoupon;
-    </script>
+        // 3. 加入云端核销记录（真正保存）
+        used.push(input);
+        await fetch(CLOUD_URL, {
+            method: "PUT",
+            headers: { ...HEADERS, "Content-Type": "application/json" },
+            body: JSON.stringify({ used })
+        });
+
+        msg.innerText = "✅ 核销成功（已云端记录）";
+        msg.style.color = "green";
+    } catch (e) {
+        msg.innerText = "⚠️ 网络异常，请重试";
+        msg.style.color = "red";
+    }
+}
+</script>
 </body>
 </html>
