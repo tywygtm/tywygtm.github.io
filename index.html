@@ -40,7 +40,132 @@
             <div class="msg" id="msg"></div>
         </div>
     </div>
+</div><!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鑫光大瑁恩瑁爱店优惠券</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"微软雅黑",sans-serif}
+        body{background:#f4f4f4;padding:20px}
+        .box{max-width:400px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,0.1)}
+        .top{background:#e63946;color:#fff;text-align:center;padding:25px 15px}
+        .shop{font-size:20px;font-weight:bold;cursor:pointer}
+        .money{font-size:42px;font-weight:bold;margin:8px 0}
+        .body{padding:25px 20px;text-align:center}
+        .code{background:#fef2f2;color:#d62828;padding:14px;border-radius:10px;font-size:18px;letter-spacing:2px;font-weight:bold;margin:16px 0}
+        .tip{color:#666;font-size:14px;line-height:1.6}
+        .admin{display:none;margin-top:25px;padding-top:20px;border-top:1px solid #eee}
+        input{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;margin-bottom:10px}
+        button{width:100%;padding:12px;background:#e63946;color:#fff;border:none;border-radius:8px;font-weight:bold}
+        .msg{margin-top:15px;font-weight:bold;text-align:center}
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="top">
+        <div class="shop" id="shopName">鑫光大瑁恩瑁爱店</div>
+        <div class="money">满100减15</div>
+    </div>
+    <div class="body">
+        <div class="tip">线下门店专用 · 仅限使用一次</div>
+        <div class="code" id="userCode">加载中...</div>
+        <div class="tip">请截图保存<br>到店出示核销码使用</div>
+        <div class="admin" id="adminPanel">
+            <h3 style="text-align:center;margin-bottom:10px">商家核销后台</h3>
+            <input id="checkCode" placeholder="输入8位数字核销码">
+            <button onclick="verifyCoupon()">确认核销</button>
+            <div class="msg" id="msgBox"></div>
+        </div>
+    </div>
 </div>
+
+<script>
+// ========== 你的GitHub配置 自行替换 ==========
+const OWNER = "tywygtm";     // 你的GitHub用户名
+const REPO = "tywygtm.github.io";  // 存放页面的仓库名
+const ISSUE_TITLE = "COUPON_USED_LIST"; // 固定数据表标题
+
+// 1. 用户端：生成固定8位核销码，刷新不改变
+let userCouponCode = localStorage.getItem("localCouponCode");
+if(!userCouponCode){
+    userCouponCode = String(Math.floor(10000000 + Math.random() * 90000000));
+    localStorage.setItem("localCouponCode",userCouponCode);
+}
+document.getElementById("userCode").innerText = userCouponCode;
+
+// 2. 隐藏核销入口：点击店铺名5次弹出
+let clickNum = 0;
+document.getElementById("shopName").addEventListener("click",()=>{
+    clickNum++;
+    if(clickNum >=5){
+        document.getElementById("adminPanel").style.display = "block";
+        clickNum = 0;
+    }
+});
+
+// 3. 获取GitHub已核销券号列表
+async function getUsedCoupons(){
+    let res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues?title=${ISSUE_TITLE}`);
+    let issues = await res.json();
+    if(issues.length === 0) return [];
+    return issues[0].body.split(",").filter(item=>item.trim()!=='');
+}
+
+// 4. 写入新核销券号到GitHub数据表
+async function saveUsedCoupon(code,oldList){
+    let newList = [...new Set([...oldList,code])];
+    let content = newList.join(",");
+    let issues = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues?title=${ISSUE_TITLE}`).then(r=>r.json());
+    if(issues.length>0){
+        // 更新已有数据
+        await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues/${issues[0].number}`,{
+            method:"PATCH",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({body:content})
+        })
+    }else{
+        // 新建数据表
+        await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/issues`,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({title:ISSUE_TITLE,body:content})
+        })
+    }
+}
+
+// 5. 核心核销逻辑
+async function verifyCoupon(){
+    let inputCode = document.getElementById("checkCode").value.trim();
+    let msgDom = document.getElementById("msgBox");
+    msgDom.innerText = "校验中...";
+    msgDom.style.color="#666";
+
+    if(!/^\d{8}$/.test(inputCode)){
+        msgDom.innerText = "请输入正确8位数字核销码";
+        msgDom.style.color="red";
+        return;
+    }
+    try{
+        let usedList = await getUsedCoupons();
+        if(usedList.includes(inputCode)){
+            msgDom.innerText = "❌ 该优惠券已核销，禁止重复使用";
+            msgDom.style.color="red";
+            return;
+        }
+        await saveUsedCoupon(inputCode,usedList);
+        msgDom.innerText = "✅ 核销成功，已录入GitHub记录表";
+        msgDom.style.color="green";
+    }catch(err){
+        msgDom.innerText = "⚠️ 读取仓库数据失败，请稍后重试";
+        msgDom.style.color="red";
+        console.log(err);
+    }
+}
+</script>
+</body>
+</html>
 
 <script>
 // ==================== 配置 ====================
